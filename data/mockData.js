@@ -82,7 +82,7 @@ function makeServiceInfo(accountId, brandId, brandName, planId, planName) {
 function makeOperator(accountId, BASE) {
   return {
     uri: `${BASE}/restapi/v1.0/account/${accountId}/extension/ext-${accountId.replace('acc-', '')}-100`,
-    id: parseInt(accountId.replace('acc-', ''), 10),
+    id: accountId,
     extensionNumber: '100',
   };
 }

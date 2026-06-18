@@ -8,7 +8,7 @@ const router = Router();
 // ── Helpers ──────────────────────────────────────────────────
 function resolveAccount(req, res) {
   const { accountId } = req.params;
-  const id = accountId === '~' ? req.tokenInfo.accountId : accountId;
+  const id = accountId === '~' ? Object.keys(accounts)[0] : accountId;
   const acc = accounts[id];
   if (!acc) {
     res.status(404).json({ errorCode: 'CMN-120', message: `Account '${id}' not found.` });
