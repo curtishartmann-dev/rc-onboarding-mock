@@ -4,8 +4,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 
-const authMiddleware = require('./middleware/auth');
-
 const authRoutes        = require('./routes/auth');
 const accountRoutes     = require('./routes/account');
 const extensionRoutes   = require('./routes/extensions');
@@ -28,11 +26,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'rc-onboarding-mock', version: '1.0.0', timestamp: new Date().toISOString() });
 });
 
-// ── Auth routes (no token required) ─────────────────────────
+// ── Auth routes ───────────────────────────────────────────────
 app.use(authRoutes);
-
-// ── Apply token auth to all other routes ────────────────────
-app.use(authMiddleware);
 
 // ── RC API-compatible routes ─────────────────────────────────
 app.use(accountRoutes);
