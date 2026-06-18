@@ -8,6 +8,9 @@
 
 const { v4: uuidv4 } = require('uuid');
 
+// ── Base URL ──────────────────────────────────────────────────
+const BASE_URL = process.env.BASE_URL || 'https://rc-onboarding-mock.onrender.com';
+
 // ── Helpers ──────────────────────────────────────────────────
 const ts = () => new Date().toISOString();
 
@@ -65,19 +68,34 @@ const partners = {
   },
 };
 
-// ── Accounts (Customer Companies) ────────────────────────────
+// ── Helper: build spec-compliant ServiceInfo ─────────────────
+function makeServiceInfo(accountId, brandId, brandName, planId, planName) {
+  return {
+    uri: `${BASE_URL}/restapi/v1.0/account/${accountId}/service-info`,
+    brand: { id: brandId, name: brandName },
+    servicePlan: { id: planId, name: planName },
+    billingPlan: { id: 'bp-monthly', name: 'Monthly', durationUnit: 'Month', duration: 1, type: 'Regular' },
+  };
+}
+
+// ── Helper: build spec-compliant operator info ────────────────
+function makeOperator(accountId, BASE) {
+  return {
+    uri: `${BASE}/restapi/v1.0/account/${accountId}/extension/ext-${accountId.replace('acc-', '')}-100`,
+    id: parseInt(accountId.replace('acc-', ''), 10),
+    extensionNumber: '100',
+  };
+}
+
+// ── Accounts (Customer Companies) — GetAccountInfoResponse ────
 const accounts = {
   'acc-001': {
     id: 'acc-001',
-    uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001',
-    serviceInfo: {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001/service-info',
-      brand: { id: 'partner-att', name: 'AT&T Office@Hand' },
-      servicePlan: { id: 'sp-premium', name: 'RingEX Premium' },
-    },
-    operator: { id: 'acc-001', extensionNumber: '0' },
+    uri: `${BASE_URL}/restapi/v1.0/account/acc-001`,
+    serviceInfo: makeServiceInfo('acc-001', '1001', 'AT&T Office@Hand', 'sp-premium', 'RingEX Premium'),
+    operator: makeOperator('acc-001', BASE_URL),
     mainNumber: '+14085550101',
-    name: 'Acme Corp',
+    name: 'Acme Corp',                   // kept for custom /api/* endpoints
     status: 'Confirmed',
     setupWizardState: 'NotStarted',
     signupInfo: {
@@ -86,17 +104,18 @@ const accounts = {
       lastName: 'Wilson',
       country: { id: '1', isoCode: 'US', name: 'United States' },
     },
+    regionalSettings: {
+      timezone: { id: '58', name: 'US/Pacific', bias: '-420' },
+      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
+      language: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      formattingLocale: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      timeFormat: '12h',
+    },
+    // Custom fields (not in spec, used by onboarding routes)
     partnerId: 'partner-att',
     onboardingType: 'preconfig',
     onboardingStatus: 'pending',
     seats: 25,
-    createdAt: '2024-11-01T00:00:00.000Z',
-    regionalSettings: {
-      timezone: { id: '58', name: 'US/Pacific' },
-      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
-      language: { id: 'en-US', name: 'English (United States)' },
-      formattingLocale: { id: 'en-US', name: 'English (United States)' },
-    },
     serviceFeatures: [
       { featureName: 'SMS', enabled: true },
       { featureName: 'Voicemail', enabled: true },
@@ -106,12 +125,9 @@ const accounts = {
   },
   'acc-002': {
     id: 'acc-002',
-    uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-002',
-    serviceInfo: {
-      brand: { id: 'partner-frontier', name: 'Frontier RingEX' },
-      servicePlan: { id: 'sp-standard', name: 'RingEX Standard' },
-    },
-    operator: { id: 'acc-002', extensionNumber: '0' },
+    uri: `${BASE_URL}/restapi/v1.0/account/acc-002`,
+    serviceInfo: makeServiceInfo('acc-002', '1002', 'Frontier RingEX', 'sp-standard', 'RingEX Standard'),
+    operator: makeOperator('acc-002', BASE_URL),
     mainNumber: '+14085550201',
     name: 'Blue Sky Technologies',
     status: 'Confirmed',
@@ -122,17 +138,17 @@ const accounts = {
       lastName: 'Chen',
       country: { id: '1', isoCode: 'US', name: 'United States' },
     },
+    regionalSettings: {
+      timezone: { id: '11', name: 'US/Eastern', bias: '-240' },
+      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
+      language: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      formattingLocale: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      timeFormat: '12h',
+    },
     partnerId: 'partner-frontier',
     onboardingType: 'preconfig',
     onboardingStatus: 'pending',
     seats: 10,
-    createdAt: '2024-12-15T00:00:00.000Z',
-    regionalSettings: {
-      timezone: { id: '11', name: 'US/Eastern' },
-      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
-      language: { id: 'en-US', name: 'English (United States)' },
-      formattingLocale: { id: 'en-US', name: 'English (United States)' },
-    },
     serviceFeatures: [
       { featureName: 'SMS', enabled: true },
       { featureName: 'Voicemail', enabled: true },
@@ -141,12 +157,9 @@ const accounts = {
   },
   'acc-003': {
     id: 'acc-003',
-    uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-003',
-    serviceInfo: {
-      brand: { id: 'partner-cox', name: 'Cox Business Voice' },
-      servicePlan: { id: 'sp-premium', name: 'RingEX Premium' },
-    },
-    operator: { id: 'acc-003', extensionNumber: '0' },
+    uri: `${BASE_URL}/restapi/v1.0/account/acc-003`,
+    serviceInfo: makeServiceInfo('acc-003', '1003', 'Cox Business Voice', 'sp-premium', 'RingEX Premium'),
+    operator: makeOperator('acc-003', BASE_URL),
     mainNumber: '+17025550301',
     name: 'Desert Sun Realty',
     status: 'Confirmed',
@@ -157,17 +170,17 @@ const accounts = {
       lastName: 'Rivera',
       country: { id: '1', isoCode: 'US', name: 'United States' },
     },
+    regionalSettings: {
+      timezone: { id: '45', name: 'US/Mountain', bias: '-360' },
+      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
+      language: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      formattingLocale: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      timeFormat: '12h',
+    },
     partnerId: 'partner-cox',
     onboardingType: 'preconfig',
     onboardingStatus: 'pending',
     seats: 15,
-    createdAt: '2025-01-20T00:00:00.000Z',
-    regionalSettings: {
-      timezone: { id: '45', name: 'US/Mountain' },
-      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
-      language: { id: 'en-US', name: 'English (United States)' },
-      formattingLocale: { id: 'en-US', name: 'English (United States)' },
-    },
     serviceFeatures: [
       { featureName: 'SMS', enabled: true },
       { featureName: 'Voicemail', enabled: true },
@@ -175,12 +188,9 @@ const accounts = {
   },
   'acc-004': {
     id: 'acc-004',
-    uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-004',
-    serviceInfo: {
-      brand: { id: 'partner-direct', name: 'RingCentral' },
-      servicePlan: { id: 'sp-ultimate', name: 'RingEX Ultimate' },
-    },
-    operator: { id: 'acc-004', extensionNumber: '0' },
+    uri: `${BASE_URL}/restapi/v1.0/account/acc-004`,
+    serviceInfo: makeServiceInfo('acc-004', '1004', 'RingCentral', 'sp-ultimate', 'RingEX Ultimate'),
+    operator: makeOperator('acc-004', BASE_URL),
     mainNumber: '+13125550401',
     name: 'Lakeside Law Group',
     status: 'Confirmed',
@@ -191,17 +201,17 @@ const accounts = {
       lastName: 'Thompson',
       country: { id: '1', isoCode: 'US', name: 'United States' },
     },
+    regionalSettings: {
+      timezone: { id: '24', name: 'US/Central', bias: '-300' },
+      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
+      language: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      formattingLocale: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      timeFormat: '12h',
+    },
     partnerId: 'partner-direct',
     onboardingType: 'regular',
     onboardingStatus: 'pending',
     seats: 40,
-    createdAt: '2025-02-10T00:00:00.000Z',
-    regionalSettings: {
-      timezone: { id: '24', name: 'US/Central' },
-      homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
-      language: { id: 'en-US', name: 'English (United States)' },
-      formattingLocale: { id: 'en-US', name: 'English (United States)' },
-    },
     serviceFeatures: [
       { featureName: 'SMS', enabled: true },
       { featureName: 'Voicemail', enabled: true },
@@ -211,12 +221,9 @@ const accounts = {
   },
   'acc-005': {
     id: 'acc-005',
-    uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-005',
-    serviceInfo: {
-      brand: { id: 'partner-brightspeed', name: 'Brightspeed UCaaS' },
-      servicePlan: { id: 'sp-standard', name: 'RingEX Standard' },
-    },
-    operator: { id: 'acc-005', extensionNumber: '0' },
+    uri: `${BASE_URL}/restapi/v1.0/account/acc-005`,
+    serviceInfo: makeServiceInfo('acc-005', '1005', 'Brightspeed UCaaS', 'sp-standard', 'RingEX Standard'),
+    operator: makeOperator('acc-005', BASE_URL),
     mainNumber: '+19805550501',
     name: 'Mountain View Dental',
     status: 'Confirmed',
@@ -231,12 +238,12 @@ const accounts = {
     onboardingType: 'regular',
     onboardingStatus: 'pending',
     seats: 8,
-    createdAt: '2025-03-05T00:00:00.000Z',
     regionalSettings: {
-      timezone: { id: '45', name: 'US/Mountain' },
+      timezone: { id: '45', name: 'US/Mountain', bias: '-360' },
       homeCountry: { id: '1', isoCode: 'US', name: 'United States' },
-      language: { id: 'en-US', name: 'English (United States)' },
-      formattingLocale: { id: 'en-US', name: 'English (United States)' },
+      language: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      formattingLocale: { id: 'en-US', name: 'English (United States)', localeCode: 'en-US' },
+      timeFormat: '12h',
     },
     serviceFeatures: [
       { featureName: 'SMS', enabled: true },
@@ -250,12 +257,13 @@ const accounts = {
 const extensions = {
   'acc-001': {
     'ext-001-100': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001/extension/ext-001-100',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-001/extension/ext-001-100`,
       id: 'ext-001-100',
       extensionNumber: '100',
       contact: {
         firstName: 'James',
         lastName: 'Wilson',
+        name: 'James Wilson',
         email: 'james.wilson@acme.com',
         businessPhone: '+14085550102',
       },
@@ -274,12 +282,13 @@ const extensions = {
       assignedRole: { id: 'role-admin', displayName: 'Super Admin' },
     },
     'ext-001-101': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001/extension/ext-001-101',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-001/extension/ext-001-101`,
       id: 'ext-001-101',
       extensionNumber: '101',
       contact: {
         firstName: 'Sarah',
         lastName: 'Mitchell',
+        name: 'Sarah Mitchell',
         email: 'sarah.mitchell@acme.com',
         businessPhone: '+14085550103',
       },
@@ -298,12 +307,13 @@ const extensions = {
       assignedRole: { id: 'role-user', displayName: 'Standard User' },
     },
     'ext-001-102': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001/extension/ext-001-102',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-001/extension/ext-001-102`,
       id: 'ext-001-102',
       extensionNumber: '102',
       contact: {
         firstName: 'David',
         lastName: 'Nguyen',
+        name: 'David Nguyen',
         email: 'david.nguyen@acme.com',
         businessPhone: '+14085550104',
       },
@@ -322,7 +332,7 @@ const extensions = {
       assignedRole: { id: 'role-user', displayName: 'Standard User' },
     },
     'ext-001-200': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001/extension/ext-001-200',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-001/extension/ext-001-200`,
       id: 'ext-001-200',
       extensionNumber: '200',
       name: 'Main Reception',
@@ -333,7 +343,7 @@ const extensions = {
       hidden: false,
     },
     'ext-001-300': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-001/extension/ext-001-300',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-001/extension/ext-001-300`,
       id: 'ext-001-300',
       extensionNumber: '300',
       name: 'Sales Queue',
@@ -346,12 +356,13 @@ const extensions = {
   },
   'acc-002': {
     'ext-002-100': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-002/extension/ext-002-100',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-002/extension/ext-002-100`,
       id: 'ext-002-100',
       extensionNumber: '100',
       contact: {
         firstName: 'Maria',
         lastName: 'Chen',
+        name: 'Maria Chen',
         email: 'maria.chen@bluesky.tech',
         businessPhone: '+14085550202',
       },
@@ -365,12 +376,13 @@ const extensions = {
       assignedRole: { id: 'role-admin', displayName: 'Super Admin' },
     },
     'ext-002-101': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-002/extension/ext-002-101',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-002/extension/ext-002-101`,
       id: 'ext-002-101',
       extensionNumber: '101',
       contact: {
         firstName: 'Tom',
         lastName: 'Baker',
+        name: 'Tom Baker',
         email: 'tom.baker@bluesky.tech',
         businessPhone: '+14085550203',
       },
@@ -384,12 +396,13 @@ const extensions = {
       assignedRole: { id: 'role-user', displayName: 'Standard User' },
     },
     'ext-002-102': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-002/extension/ext-002-102',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-002/extension/ext-002-102`,
       id: 'ext-002-102',
       extensionNumber: '102',
       contact: {
         firstName: 'Lisa',
         lastName: 'Park',
+        name: 'Lisa Park',
         email: 'lisa.park@bluesky.tech',
         businessPhone: '+14085550204',
       },
@@ -403,7 +416,7 @@ const extensions = {
       assignedRole: { id: 'role-user', displayName: 'Standard User' },
     },
     'ext-002-200': {
-      uri: 'https://platform.ringcentral.com/restapi/v1.0/account/acc-002/extension/ext-002-200',
+      uri: `${BASE_URL}/restapi/v1.0/account/acc-002/extension/ext-002-200`,
       id: 'ext-002-200',
       extensionNumber: '200',
       name: 'Auto-Receptionist',
@@ -417,7 +430,7 @@ const extensions = {
   'acc-003': {
     'ext-003-100': {
       id: 'ext-003-100', extensionNumber: '100',
-      contact: { firstName: 'Carlos', lastName: 'Rivera', email: 'carlos.rivera@desertsun.com', businessPhone: '+17025550302' },
+      contact: { firstName: 'Carlos', lastName: 'Rivera', name: 'Carlos Rivera', email: 'carlos.rivera@desertsun.com', businessPhone: '+17025550302' },
       name: 'Carlos Rivera', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: true }, internationalCalling: { enabled: false } },
       setupWizardState: 'Completed', hidden: false,
@@ -425,7 +438,7 @@ const extensions = {
     },
     'ext-003-101': {
       id: 'ext-003-101', extensionNumber: '101',
-      contact: { firstName: 'Anna', lastName: 'Perez', email: 'anna.perez@desertsun.com', businessPhone: '+17025550303' },
+      contact: { firstName: 'Anna', lastName: 'Perez', name: 'Anna Perez', email: 'anna.perez@desertsun.com', businessPhone: '+17025550303' },
       name: 'Anna Perez', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: false }, internationalCalling: { enabled: false } },
       setupWizardState: 'NotStarted', hidden: false,
@@ -440,7 +453,7 @@ const extensions = {
   'acc-004': {
     'ext-004-100': {
       id: 'ext-004-100', extensionNumber: '100',
-      contact: { firstName: 'Patricia', lastName: 'Thompson', email: 'patricia.thompson@lakesidelaw.com', businessPhone: '+13125550402' },
+      contact: { firstName: 'Patricia', lastName: 'Thompson', name: 'Patricia Thompson', email: 'patricia.thompson@lakesidelaw.com', businessPhone: '+13125550402' },
       name: 'Patricia Thompson', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: true }, internationalCalling: { enabled: true } },
       setupWizardState: 'NotStarted', hidden: false,
@@ -448,7 +461,7 @@ const extensions = {
     },
     'ext-004-101': {
       id: 'ext-004-101', extensionNumber: '101',
-      contact: { firstName: 'Robert', lastName: 'Johnson', email: 'robert.johnson@lakesidelaw.com', businessPhone: '+13125550403' },
+      contact: { firstName: 'Robert', lastName: 'Johnson', name: 'Robert Johnson', email: 'robert.johnson@lakesidelaw.com', businessPhone: '+13125550403' },
       name: 'Robert Johnson', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: false }, internationalCalling: { enabled: true } },
       setupWizardState: 'NotStarted', hidden: false,
@@ -456,7 +469,7 @@ const extensions = {
     },
     'ext-004-102': {
       id: 'ext-004-102', extensionNumber: '102',
-      contact: { firstName: 'Emily', lastName: 'Davis', email: 'emily.davis@lakesidelaw.com', businessPhone: '+13125550404' },
+      contact: { firstName: 'Emily', lastName: 'Davis', name: 'Emily Davis', email: 'emily.davis@lakesidelaw.com', businessPhone: '+13125550404' },
       name: 'Emily Davis', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: false }, internationalCalling: { enabled: false } },
       setupWizardState: 'NotStarted', hidden: false,
@@ -466,7 +479,7 @@ const extensions = {
   'acc-005': {
     'ext-005-100': {
       id: 'ext-005-100', extensionNumber: '100',
-      contact: { firstName: 'Kevin', lastName: 'Park', email: 'kevin.park@mvdental.com', businessPhone: '+19805550502' },
+      contact: { firstName: 'Kevin', lastName: 'Park', name: 'Kevin Park', email: 'kevin.park@mvdental.com', businessPhone: '+19805550502' },
       name: 'Kevin Park', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: true }, internationalCalling: { enabled: false } },
       setupWizardState: 'NotStarted', hidden: false,
@@ -474,7 +487,7 @@ const extensions = {
     },
     'ext-005-101': {
       id: 'ext-005-101', extensionNumber: '101',
-      contact: { firstName: 'Jennifer', lastName: 'Lee', email: 'jennifer.lee@mvdental.com', businessPhone: '+19805550503' },
+      contact: { firstName: 'Jennifer', lastName: 'Lee', name: 'Jennifer Lee', email: 'jennifer.lee@mvdental.com', businessPhone: '+19805550503' },
       name: 'Jennifer Lee', type: 'User', status: 'Enabled',
       permissions: { admin: { enabled: false }, internationalCalling: { enabled: false } },
       setupWizardState: 'NotStarted', hidden: false,
@@ -517,9 +530,9 @@ const phoneNumbers = {
 // ── Devices ───────────────────────────────────────────────────
 const devices = {
   'acc-001': [
-    { id: 'dev-001-1', uri: '/restapi/v1.0/account/acc-001/device/dev-001-1', sku: 'POLYCOM-VVX-450', type: 'HardPhone', name: 'Polycom VVX 450', status: 'Online', serial: 'SN001-001', model: { id: 'm-01', name: 'VVX 450', addons: [] }, extension: { id: 'ext-001-100', extensionNumber: '100', name: 'James Wilson' }, phoneLines: [{ lineType: 'StandaloneFree', phoneInfo: { id: 'pn-001-2', phoneNumber: '+14085550102' } }], site: { id: 'main', name: 'Main Site' } },
-    { id: 'dev-001-2', uri: '/restapi/v1.0/account/acc-001/device/dev-001-2', sku: 'POLYCOM-VVX-450', type: 'HardPhone', name: 'Polycom VVX 450', status: 'Online', serial: 'SN001-002', model: { id: 'm-01', name: 'VVX 450', addons: [] }, extension: { id: 'ext-001-101', extensionNumber: '101', name: 'Sarah Mitchell' }, phoneLines: [{ lineType: 'StandaloneFree', phoneInfo: { id: 'pn-001-3', phoneNumber: '+14085550103' } }], site: { id: 'main', name: 'Main Site' } },
-    { id: 'dev-001-3', uri: '/restapi/v1.0/account/acc-001/device/dev-001-3', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Online', serial: null, model: null, extension: { id: 'ext-001-102', extensionNumber: '102', name: 'David Nguyen' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-001-1', uri: `${BASE_URL}/restapi/v1.0/account/acc-001/device/dev-001-1`, sku: 'POLYCOM-VVX-450', type: 'HardPhone', name: 'Polycom VVX 450', status: 'Online', serial: 'SN001-001', model: { id: 'm-01', name: 'VVX 450', addons: [] }, extension: { id: 'ext-001-100', extensionNumber: '100', name: 'James Wilson' }, phoneLines: [{ lineType: 'StandaloneFree', phoneInfo: { id: 'pn-001-2', phoneNumber: '+14085550102' } }], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-001-2', uri: `${BASE_URL}/restapi/v1.0/account/acc-001/device/dev-001-2`, sku: 'POLYCOM-VVX-450', type: 'HardPhone', name: 'Polycom VVX 450', status: 'Online', serial: 'SN001-002', model: { id: 'm-01', name: 'VVX 450', addons: [] }, extension: { id: 'ext-001-101', extensionNumber: '101', name: 'Sarah Mitchell' }, phoneLines: [{ lineType: 'StandaloneFree', phoneInfo: { id: 'pn-001-3', phoneNumber: '+14085550103' } }], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-001-3', uri: `${BASE_URL}/restapi/v1.0/account/acc-001/device/dev-001-3`, sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Online', serial: null, model: null, extension: { id: 'ext-001-102', extensionNumber: '102', name: 'David Nguyen' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
   ],
   'acc-002': [
     { id: 'dev-002-1', sku: 'CISCO-8865', type: 'HardPhone', name: 'Cisco 8865', status: 'Online', serial: 'SN002-001', model: { id: 'm-02', name: 'Cisco 8865', addons: [] }, extension: { id: 'ext-002-100', extensionNumber: '100', name: 'Maria Chen' }, phoneLines: [{ lineType: 'StandaloneFree', phoneInfo: { id: 'pn-002-2', phoneNumber: '+14085550202' } }], site: { id: 'main', name: 'Main Site' } },
@@ -530,13 +543,13 @@ const devices = {
     { id: 'dev-003-1', sku: 'POLYCOM-VVX-350', type: 'HardPhone', name: 'Polycom VVX 350', status: 'Online', serial: 'SN003-001', model: { id: 'm-03', name: 'VVX 350' }, extension: { id: 'ext-003-100', extensionNumber: '100', name: 'Carlos Rivera' }, phoneLines: [{ lineType: 'StandaloneFree', phoneInfo: { id: 'pn-003-2', phoneNumber: '+17025550302' } }], site: { id: 'main', name: 'Main Site' } },
   ],
   'acc-004': [
-    { id: 'dev-004-1', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'NotActivated', serial: null, model: null, extension: { id: 'ext-004-100', extensionNumber: '100', name: 'Patricia Thompson' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
-    { id: 'dev-004-2', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'NotActivated', serial: null, model: null, extension: { id: 'ext-004-101', extensionNumber: '101', name: 'Robert Johnson' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
-    { id: 'dev-004-3', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'NotActivated', serial: null, model: null, extension: { id: 'ext-004-102', extensionNumber: '102', name: 'Emily Davis' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-004-1', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Offline', serial: null, model: null, extension: { id: 'ext-004-100', extensionNumber: '100', name: 'Patricia Thompson' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-004-2', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Offline', serial: null, model: null, extension: { id: 'ext-004-101', extensionNumber: '101', name: 'Robert Johnson' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-004-3', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Offline', serial: null, model: null, extension: { id: 'ext-004-102', extensionNumber: '102', name: 'Emily Davis' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
   ],
   'acc-005': [
-    { id: 'dev-005-1', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'NotActivated', serial: null, model: null, extension: { id: 'ext-005-100', extensionNumber: '100', name: 'Kevin Park' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
-    { id: 'dev-005-2', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'NotActivated', serial: null, model: null, extension: { id: 'ext-005-101', extensionNumber: '101', name: 'Jennifer Lee' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-005-1', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Offline', serial: null, model: null, extension: { id: 'ext-005-100', extensionNumber: '100', name: 'Kevin Park' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
+    { id: 'dev-005-2', sku: 'SOFTPHONE', type: 'SoftPhone', name: 'RingCentral App', status: 'Offline', serial: null, model: null, extension: { id: 'ext-005-101', extensionNumber: '101', name: 'Jennifer Lee' }, phoneLines: [], site: { id: 'main', name: 'Main Site' } },
   ],
 };
 
@@ -867,6 +880,7 @@ function validateToken(token) {
 }
 
 module.exports = {
+  BASE_URL,
   partners,
   accounts,
   extensions,

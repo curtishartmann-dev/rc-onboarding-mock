@@ -201,7 +201,7 @@ router.put('/restapi/v1.0/account/:accountId/ivr-menus/:ivrMenuId', (req, res) =
 router.get('/restapi/v1.0/account/:accountId/call-queues', (req, res) => {
   const { accountId } = req.params;
   const records = callQueues[accountId] || [];
-  res.json({ uri: `/restapi/v1.0/account/${accountId}/call-queues`, records, paging: { totalElements: records.length } });
+  res.json({ uri: `/restapi/v1.0/account/${accountId}/call-queues`, records, paging: { page: 1, perPage: 100, pageStart: 0, pageEnd: records.length, totalPages: 1, totalElements: records.length }, navigation: { firstPage: { uri: `/restapi/v1.0/account/${accountId}/call-queues?page=1` }, lastPage: { uri: `/restapi/v1.0/account/${accountId}/call-queues?page=1` } } });
 });
 
 router.get('/restapi/v1.0/account/:accountId/call-queues/:groupId', (req, res) => {
@@ -215,7 +215,8 @@ router.get('/restapi/v1.0/account/:accountId/call-queues/:groupId/members', (req
   const { accountId, groupId } = req.params;
   const q = (callQueues[accountId] || []).find(q => q.id === groupId);
   if (!q) return res.status(404).json({ errorCode: 'CMN-120', message: 'Call queue not found.' });
-  res.json({ uri: `/restapi/v1.0/account/${accountId}/call-queues/${groupId}/members`, records: q.members || [], paging: { totalElements: (q.members || []).length } });
+  const members = q.members || [];
+  res.json({ uri: `/restapi/v1.0/account/${accountId}/call-queues/${groupId}/members`, records: members, paging: { page: 1, perPage: 100, pageStart: 0, pageEnd: members.length, totalPages: 1, totalElements: members.length }, navigation: { firstPage: { uri: '' }, lastPage: { uri: '' } } });
 });
 
 router.post('/restapi/v1.0/account/:accountId/call-queues/:groupId/bulk-assign', (req, res) => {

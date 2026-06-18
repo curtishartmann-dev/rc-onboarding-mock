@@ -16,7 +16,8 @@ router.get('/restapi/v1.0/account/:accountId/phone-number', (req, res) => {
   res.json({
     uri: `/restapi/v1.0/account/${accountId}/phone-number`,
     records,
-    paging: { page: 1, perPage: 100, totalElements: records.length },
+    paging: { page: 1, perPage: 100, pageStart: 0, pageEnd: records.length, totalPages: 1, totalElements: records.length },
+    navigation: { firstPage: { uri: `/restapi/v1.0/account/${accountId}/phone-number?page=1` }, lastPage: { uri: `/restapi/v1.0/account/${accountId}/phone-number?page=1` } },
   });
 });
 
@@ -37,7 +38,8 @@ router.get('/restapi/v2/accounts/:accountId/phone-numbers', (req, res) => {
   if (status) records = records.filter(n => n.status === status);
   res.json({
     records,
-    paging: { page: 1, perPage: 100, totalElements: records.length },
+    paging: { page: 1, perPage: 100, pageStart: 0, pageEnd: records.length, totalPages: 1, totalElements: records.length },
+    navigation: { firstPage: { uri: `/restapi/v2/accounts/${accountId}/phone-numbers?page=1` }, lastPage: { uri: `/restapi/v2/accounts/${accountId}/phone-numbers?page=1` } },
   });
 });
 

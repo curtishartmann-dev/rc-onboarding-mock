@@ -59,7 +59,7 @@ router.post('/restapi/v1.0/account/:accountId/extension', (req, res) => {
     contact: body.contact || {},
     name: body.contact ? `${body.contact.firstName || ''} ${body.contact.lastName || ''}`.trim() : 'New User',
     type: body.type || 'User',
-    status: 'NotActivated',
+    status: 'Offline',
     departments: body.departments || [],
     permissions: body.permissions || { admin: { enabled: false }, internationalCalling: { enabled: false } },
     setupWizardState: 'NotStarted',

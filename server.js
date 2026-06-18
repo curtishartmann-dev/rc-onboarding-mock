@@ -4,6 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 
+const { BASE_URL } = require('./data/mockData');
+
 const authRoutes        = require('./routes/auth');
 const accountRoutes     = require('./routes/account');
 const extensionRoutes   = require('./routes/extensions');
@@ -49,10 +51,10 @@ app.get('/', (req, res) => {
     docs: '/api-reference',
     health: '/health',
     quickStart: {
-      step1: 'GET /api/partners — list partners (no auth needed)',
-      step2: 'GET /api/accounts — list mock accounts',
-      step3: 'POST /restapi/oauth/token — get access token (body: { account_id: "acc-001" })',
-      step4: 'GET /api/onboarding/preflight/acc-001 — see pre-flight check',
+      step1: `GET ${BASE_URL}/api/partners — list partners`,
+      step2: `GET ${BASE_URL}/api/accounts — list mock accounts`,
+      step3: `POST ${BASE_URL}/restapi/oauth/token — get access token (body: { account_id: "acc-001" })`,
+      step4: `GET ${BASE_URL}/api/onboarding/preflight/acc-001 — see pre-flight check`,
       step5: 'POST /api/onboarding/sessions — start onboarding session',
       step6: 'GET /api/onboarding/sessions/:id/checklist — view checklist',
       step7: 'POST /api/onboarding/sessions/:id/simulate/:stepId — simulate a step',
@@ -192,11 +194,11 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\n🚀 RC Onboarding Mock API running on port ${PORT}`);
-  console.log(`   Health:     http://localhost:${PORT}/health`);
-  console.log(`   Root:       http://localhost:${PORT}/`);
-  console.log(`   API Ref:    http://localhost:${PORT}/api-reference`);
+  console.log(`   Local:      http://localhost:${PORT}/`);
+  console.log(`   Production: ${BASE_URL}/`);
+  console.log(`   API Ref:    ${BASE_URL}/api-reference`);
   console.log(`\n   Mock Accounts: acc-001 through acc-005`);
-  console.log(`   Get token:  POST /restapi/oauth/token  { account_id: "acc-001" }\n`);
+  console.log(`   Partners:   GET ${BASE_URL}/api/partners\n`);
 });
 
 module.exports = app;

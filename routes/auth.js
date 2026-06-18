@@ -31,14 +31,18 @@ router.post('/restapi/oauth/token', (req, res) => {
 
   const accessToken = issueToken(accountId);
 
+  // TokenInfo — matches spec: session_id is required
   res.json({
     access_token: accessToken,
     token_type: 'bearer',
-    expires_in: 3600,
-    scope: 'ReadAccounts EditExtensions ReadCallLog',
+    expires_in: 7199,
+    refresh_token: 'mock_refresh_' + accessToken.slice(-8),
+    refresh_token_expires_in: 604799,
+    scope: 'ReadAccounts EditExtensions EditCallLog ReadCallLog',
     owner_id: accountId,
     endpoint_id: accountId,
     account_id: accountId,
+    session_id: `session-${accountId}-${Date.now()}`,
   });
 });
 
