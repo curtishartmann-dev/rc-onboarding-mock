@@ -33,6 +33,13 @@ router.put('/restapi/v1.0/account/:accountId', (req, res) => {
   res.json(acc);
 });
 
+// ── GET /restapi/v1.0/account/:accountId/service-info ────────
+router.get('/restapi/v1.0/account/:accountId/service-info', (req, res) => {
+  const acc = resolveAccount(req, res);
+  if (!acc) return;
+  res.json(acc.serviceInfo);
+});
+
 // ── GET /restapi — API root ───────────────────────────────────
 router.get('/restapi', (req, res) => {
   res.json({
