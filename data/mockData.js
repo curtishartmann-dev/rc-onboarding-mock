@@ -553,6 +553,15 @@ const devices = {
   ],
 };
 
+// ── Business Addresses ───────────────────────────────────────
+const businessAddresses = {
+  'acc-001': { country: { id: '1', isoCode: 'US', name: 'United States' }, state: { id: 'CA', isoCode: 'CA', name: 'California' }, city: 'San Jose', street: '100 Main Street', zip: '95101' },
+  'acc-002': { country: { id: '1', isoCode: 'US', name: 'United States' }, state: { id: 'NY', isoCode: 'NY', name: 'New York' }, city: 'New York', street: '200 Park Avenue', zip: '10001' },
+  'acc-003': { country: { id: '1', isoCode: 'US', name: 'United States' }, state: { id: 'NV', isoCode: 'NV', name: 'Nevada' }, city: 'Las Vegas', street: '300 Desert Blvd', zip: '89101' },
+  'acc-004': { country: { id: '1', isoCode: 'US', name: 'United States' }, state: { id: 'IL', isoCode: 'IL', name: 'Illinois' }, city: 'Chicago', street: '400 Lake Shore Dr', zip: '60601' },
+  'acc-005': { country: { id: '1', isoCode: 'US', name: 'United States' }, state: { id: 'CO', isoCode: 'CO', name: 'Colorado' }, city: 'Denver', street: '500 Mountain View Rd', zip: '80201' },
+};
+
 // ── Business Hours ────────────────────────────────────────────
 const businessHours = {
   'acc-001': {
@@ -886,6 +895,7 @@ module.exports = {
   extensions,
   phoneNumbers,
   devices,
+  businessAddresses,
   businessHours,
   answeringRules,
   ivrMenus,

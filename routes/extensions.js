@@ -128,6 +128,17 @@ router.put('/restapi/v1.0/account/:accountId/extension/:extensionId/caller-id', 
   res.json({ ...req.body, uri: `/restapi/v1.0/account/${req.params.accountId}/extension/${req.params.extensionId}/caller-id` });
 });
 
+// ── Assignable roles (all roles the extension could be given) ─
+router.get('/restapi/v1.0/account/:accountId/extension/:extensionId/assignable-roles', (req, res) => {
+  const { userRoles } = require('../data/mockData');
+  res.json({
+    uri: `/restapi/v1.0/account/${req.params.accountId}/extension/${req.params.extensionId}/assignable-roles`,
+    records: userRoles,
+    paging: { page: 1, perPage: 100, pageStart: 0, pageEnd: userRoles.length, totalPages: 1, totalElements: userRoles.length },
+    navigation: { firstPage: { uri: '' }, lastPage: { uri: '' } },
+  });
+});
+
 // ── Roles ─────────────────────────────────────────────────────
 router.get('/restapi/v1.0/account/:accountId/extension/:extensionId/assigned-role', (req, res) => {
   const { accountId, extensionId } = req.params;
