@@ -23,6 +23,40 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ── Full request logger (debug) ──────────────────────────────
+app.use((req, res, next) => {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`[REQUEST] ${req.method} ${req.originalUrl}`);
+  console.log(`[TIME]    ${new Date().toISOString()}`);
+
+  const headersToLog = { ...req.headers };
+  delete headersToLog['authorization']; // omit tokens from logs
+  console.log('[HEADERS]', JSON.stringify(headersToLog, null, 2));
+
+  if (req.query && Object.keys(req.query).length > 0) {
+    console.log('[QUERY]  ', JSON.stringify(req.query, null, 2));
+  }
+
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log('[BODY]   ', JSON.stringify(req.body, null, 2));
+  }
+
+  // Log response status when finished
+  const originalSend = res.send.bind(res);
+  res.send = function (body) {
+    console.log(`[RESPONSE STATUS] ${res.statusCode}`);
+    try {
+      console.log('[RESPONSE BODY]', JSON.stringify(JSON.parse(body), null, 2));
+    } catch {
+      console.log('[RESPONSE BODY]', body);
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    return originalSend(body);
+  };
+
+  next();
+});
+
 // ── Health check (no auth) ───────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'rc-onboarding-mock', version: '1.0.0', timestamp: new Date().toISOString() });
